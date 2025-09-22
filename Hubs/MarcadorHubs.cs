@@ -5,7 +5,7 @@ namespace Api.Hubs
 {
     public class MarcadorHub : Hub
     {
-        // ===== Marcador simple =====
+        // Marcador
         public class ScorePayload
         {
             public int PartidoId { get; set; }

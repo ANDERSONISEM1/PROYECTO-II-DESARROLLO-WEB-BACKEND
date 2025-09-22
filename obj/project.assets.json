@@ -2102,19 +2102,19 @@
     ]
   },
   "packageFolders": {
-    "/home/anderson/.nuget/packages/": {}
+    "C:\\Users\\admin\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/home/anderson/marcador-app/api/api.csproj",
+      "projectUniqueName": "C:\\Users\\admin\\OneDrive - Universidad Mariano Gálvez\\Semestre VIII\\desarrollo web\\Proyecto 2\\PROYECTO-II-DESARROLLO-WEB-BACKEND\\api.csproj",
       "projectName": "api",
-      "projectPath": "/home/anderson/marcador-app/api/api.csproj",
-      "packagesPath": "/home/anderson/.nuget/packages/",
-      "outputPath": "/home/anderson/marcador-app/api/obj/",
+      "projectPath": "C:\\Users\\admin\\OneDrive - Universidad Mariano Gálvez\\Semestre VIII\\desarrollo web\\Proyecto 2\\PROYECTO-II-DESARROLLO-WEB-BACKEND\\api.csproj",
+      "packagesPath": "C:\\Users\\admin\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\admin\\OneDrive - Universidad Mariano Gálvez\\Semestre VIII\\desarrollo web\\Proyecto 2\\PROYECTO-II-DESARROLLO-WEB-BACKEND\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "/home/anderson/.nuget/NuGet/NuGet.Config"
+        "C:\\Users\\admin\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
@@ -2132,7 +2132,13 @@
         "warnAsError": [
           "NU1605"
         ]
-      }
+      },
+      "restoreAuditProperties": {
+        "enableAudit": "true",
+        "auditLevel": "low",
+        "auditMode": "direct"
+      },
+      "SdkAnalysisLevel": "9.0.300"
     },
     "frameworks": {
       "net8.0": {
@@ -2166,6 +2172,24 @@
         ],
         "assetTargetFallback": true,
         "warn": true,
+        "downloadDependencies": [
+          {
+            "name": "Microsoft.AspNetCore.App.Ref",
+            "version": "[8.0.20, 8.0.20]"
+          },
+          {
+            "name": "Microsoft.NETCore.App.Host.win-x64",
+            "version": "[8.0.20, 8.0.20]"
+          },
+          {
+            "name": "Microsoft.NETCore.App.Ref",
+            "version": "[8.0.20, 8.0.20]"
+          },
+          {
+            "name": "Microsoft.WindowsDesktop.App.Ref",
+            "version": "[8.0.20, 8.0.20]"
+          }
+        ],
         "frameworkReferences": {
           "Microsoft.AspNetCore.App": {
             "privateAssets": "none"
@@ -2174,7 +2198,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/lib/dotnet/sdk/8.0.118/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.305/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
