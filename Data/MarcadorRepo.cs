@@ -14,10 +14,9 @@ public class MarcadorRepo
         using var conn = _db.Open();
         var sql = @"
             SELECT
-              e.equipo_id      AS Id,
-              e.nombre         AS Nombre,
-              e.abreviatura    AS Abreviatura,
-              e.color_primario AS Color
+              e.equipo_id   AS Id,
+              e.nombre      AS Nombre,
+              e.abreviatura AS Abreviatura
             FROM dbo.Equipo e
             WHERE e.activo = 1
             ORDER BY e.nombre;";
@@ -187,5 +186,4 @@ public record EquipoMini
     public int Id { get; init; }
     public string Nombre { get; init; } = "";
     public string? Abreviatura { get; init; }
-    public string? Color { get; init; }
 }

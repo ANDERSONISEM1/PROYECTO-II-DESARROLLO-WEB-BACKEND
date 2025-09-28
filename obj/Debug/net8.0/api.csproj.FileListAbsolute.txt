@@ -78,3 +78,7 @@
 /home/anderson/marcador-app/api/obj/Debug/net8.0/api.pdb
 /home/anderson/marcador-app/api/obj/Debug/net8.0/api.genruntimeconfig.cache
 /home/anderson/marcador-app/api/obj/Debug/net8.0/ref/api.dll
+/home/anderson/marcador-app/api/obj/Debug/net8.0/api.sourcelink.json
+/home/anderson/marcador-app/api/bin/Debug/net8.0/Konscious.Security.Cryptography.Argon2.dll
+/home/anderson/marcador-app/api/bin/Debug/net8.0/Konscious.Security.Cryptography.Blake2.dll
+/home/anderson/marcador-app/api/bin/Debug/net8.0/Microsoft.AspNetCore.Authentication.JwtBearer.dll

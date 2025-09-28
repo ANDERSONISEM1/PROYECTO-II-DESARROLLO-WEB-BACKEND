@@ -57,8 +57,8 @@ namespace Api.Hubs
             public int Id { get; set; }
             public string Nombre { get; set; } = "";
             public string? Abreviatura { get; set; }
-            public string? Color { get; set; }
         }
+
         public class TeamsState
         {
             public EquipoMini? Local { get; set; }

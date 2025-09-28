@@ -82,8 +82,11 @@ WHERE j.activo = 1 AND j.equipo_id IN (@local, @visit);",
     public async Task<(Api.Data.EquipoMini Local, Api.Data.EquipoMini Visit)> GetEquiposMiniAsync(int localId, int visitId)
     {
         const string sql = @"
-SELECT equipo_id AS Id, nombre AS Nombre, abreviatura AS Abreviatura, color_primario AS Color
-FROM dbo.Equipo WHERE equipo_id IN (@local, @visit);";
+SELECT equipo_id   AS Id,
+       nombre      AS Nombre,
+       abreviatura AS Abreviatura
+FROM dbo.Equipo
+WHERE equipo_id IN (@local, @visit);";
 
         using var conn = _db.Open();
         var rows = (await conn.QueryAsync<Api.Data.EquipoMini>(sql, new { local = localId, visit = visitId })).ToList();

@@ -22,5 +22,4 @@ public record EquipoMiniDto
     public int Id { get; init; }
     public string Nombre { get; init; } = "";
     public string? Abreviatura { get; init; }
-    public string? Color { get; init; }
 }

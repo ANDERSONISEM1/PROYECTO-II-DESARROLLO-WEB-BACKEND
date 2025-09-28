@@ -5,7 +5,6 @@ namespace Api.Models
         public int Id { get; set; }
         public string Nombre { get; set; } = "";
         public string? Abreviatura { get; set; }
-        public string? Color { get; set; }
     }
 
     // Marcador total por equipo

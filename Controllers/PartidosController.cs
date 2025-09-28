@@ -56,14 +56,12 @@ public class PartidosController : ControllerBase
             Local = new EquipoMiniDto {
                 Id = localMini.Id,
                 Nombre = localMini.Nombre,
-                Abreviatura = localMini.Abreviatura,
-                Color = localMini.Color
+                Abreviatura = localMini.Abreviatura
             },
             Visitante = new EquipoMiniDto {
                 Id = visitMini.Id,
                 Nombre = visitMini.Nombre,
-                Abreviatura = visitMini.Abreviatura,
-                Color = visitMini.Color
+                Abreviatura = visitMini.Abreviatura
             }
         };
 
