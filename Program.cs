@@ -2,12 +2,10 @@ using Api.Data;
 using Api.Hubs;
 using Api.Models;
 using Api.Services;
-using Dapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
 using System.Text;
-// 👇 Importante para ClaimTypes.Name y ClaimTypes.Role
-using System.Security.Claims; // ← NUEVO: necesario para NameClaimType y RoleClaimType
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,7 +17,7 @@ builder.Services.AddSignalR();
 // Controllers
 builder.Services.AddControllers();
 
-// Repos (tus existentes)
+// Repos existentes
 builder.Services.AddScoped<MarcadorRepo>();
 builder.Services.AddScoped<JugadoresRepo>();
 builder.Services.AddScoped<FaltasRepo>();
@@ -56,12 +54,10 @@ builder.Services
             ValidateIssuerSigningKey = true,
             ValidIssuer = jwtCfg.Issuer,
             ValidAudience = jwtCfg.Audience,
-            IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(jwtCfg.Key)),
-
-            // 👇 NUEVO: aseguramos que se usen los claim correctos
-            NameClaimType = ClaimTypes.Name,   // ← indica cuál claim se usa como nombre de usuario
-            RoleClaimType = ClaimTypes.Role    // ← indica cuál claim se usa para los roles
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtCfg.Key)),
+            NameClaimType = ClaimTypes.Name,
+            RoleClaimType = ClaimTypes.Role,
+            ClockSkew = TimeSpan.Zero
         };
 
         // Soporte para SignalR con token en querystring
@@ -80,42 +76,52 @@ builder.Services
 
 builder.Services.AddAuthorization();
 
-// CORS (dev)
+// ===== CORS DEV (abre todo: útil ahora; endurecer en prod) =====
 const string CorsDev = "cors-dev";
 builder.Services.AddCors(opt =>
 {
     opt.AddPolicy(CorsDev, p =>
-        p.WithOrigins("http://localhost:4200")
+        p.SetIsOriginAllowed(_ => true)
          .AllowAnyHeader()
          .AllowAnyMethod()
          .AllowCredentials());
 });
 
-// Seed roles
+// Seeds al arrancar
 builder.Services.AddHostedService<RolesBootstrap>();
+builder.Services.AddHostedService<AdminUserBootstrap>();
+
+// Kestrel: escuchar en todas las IPs (no localhost)
+builder.WebHost.UseKestrel();
+builder.WebHost.ConfigureKestrel(o => { o.ListenAnyIP(5080); });
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+// Swagger (ok en prod para ti ahora)
+app.UseSwagger();
+app.UseSwaggerUI();
 
+app.UseRouting();
+
+// CORS ANTES de Auth
 app.UseCors(CorsDev);
 
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapGet("/healthz", () => Results.Ok(new { status = "ok", env = app.Environment.EnvironmentName }))
-   .RequireAuthorization();
+// Healthcheck público
+app.MapGet("/healthz", () => Results.Ok(new
+{
+    status = "ok",
+    env = app.Environment.EnvironmentName,
+    timestamp = DateTime.UtcNow
+}));
 
 app.MapHub<MarcadorHub>("/hub/marcador");
 
-// Controllers
 app.MapControllers();
 
-// Puerto dev
-app.Urls.Add("http://localhost:5080");
+// No fuerces localhost aquí (rompe en contenedor):
+// app.Urls.Add("http://localhost:5080");
 
 app.Run();

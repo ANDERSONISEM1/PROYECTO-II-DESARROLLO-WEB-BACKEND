@@ -1,12 +1,12 @@
 using Api.Data;
 using Api.Models.Auth;
 using Api.Services;
+using Dapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using Dapper;
 
 namespace Api.Controllers;
 
@@ -28,6 +28,7 @@ public sealed class AuthController : ControllerBase
     }
 
     [HttpPost("login")]
+    [AllowAnonymous]
     public async Task<ActionResult<LoginResponse>> Login([FromBody] LoginRequest body)
     {
         if (string.IsNullOrWhiteSpace(body.Username) || string.IsNullOrWhiteSpace(body.Password))
@@ -70,7 +71,7 @@ VALUES (@uid, @th, @exp, @ip, @ua);";
             tx.Commit();
         }
 
-        // Cookie para el navegador (no influye en el insert)
+        // Cookie para navegador
         AppendRefreshCookie(refreshToken, refreshExpires);
 
         return Ok(new LoginResponse
@@ -87,8 +88,9 @@ VALUES (@uid, @th, @exp, @ip, @ua);";
     public async Task<ActionResult<LoginResponse>> Me()
     {
         var uidStr = User.FindFirstValue(ClaimTypes.NameIdentifier)
-                     ?? User.FindFirstValue(ClaimTypes.Name)
-                     ?? User.FindFirstValue("sub");
+                   ?? User.FindFirstValue(ClaimTypes.Name)
+                   ?? User.FindFirstValue("sub");
+
         if (string.IsNullOrWhiteSpace(uidStr)) return Unauthorized();
         if (!long.TryParse(uidStr, out var userId)) return Unauthorized();
 
@@ -110,7 +112,8 @@ VALUES (@uid, @th, @exp, @ip, @ua);";
     private static string GenerateSecureToken(int bytesLen)
     {
         var bytes = RandomNumberGenerator.GetBytes(bytesLen);
-        return Convert.ToBase64String(bytes).Replace('+', '-').Replace('/', '_').TrimEnd('=');
+        return Convert.ToBase64String(bytes)
+            .Replace('+', '-').Replace('/', '_').TrimEnd('=');
     }
 
     private static byte[] Sha256(string value)
@@ -121,11 +124,13 @@ VALUES (@uid, @th, @exp, @ip, @ua);";
 
     private void AppendRefreshCookie(string refreshToken, DateTime expiresUtc)
     {
+        var isHttps = HttpContext.Request.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase);
+
         var opts = new CookieOptions
         {
             HttpOnly = true,
-            Secure = true,               // en HTTP local puedes poner false, pero en prod debe ser true
-            SameSite = SameSiteMode.None, // << clave si el front está en otro puerto/origen
+            Secure = isHttps,            // false en HTTP local; true en prod
+            SameSite = SameSiteMode.None,
             Expires = expiresUtc,
             IsEssential = true,
             Path = "/"
