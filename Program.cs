@@ -3,13 +3,16 @@ using Api.Hubs;
 using Api.Models;
 using Api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// =====================
 // Swagger & SignalR
+// =====================
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSignalR();
@@ -17,7 +20,9 @@ builder.Services.AddSignalR();
 // Controllers
 builder.Services.AddControllers();
 
-// ======= Repositorios =======
+// =====================
+// Repositorios / Servicios
+// =====================
 builder.Services.AddScoped<MarcadorRepo>();
 builder.Services.AddScoped<JugadoresRepo>();
 builder.Services.AddScoped<FaltasRepo>();
@@ -35,7 +40,9 @@ builder.Services.AddScoped<AjustesRepo>();
 // DB wrapper
 builder.Services.AddSingleton<Db>();
 
-// ======= Auth / JWT =======
+// =====================
+// Auth / JWT
+// =====================
 var jwtSection = builder.Configuration.GetSection("Jwt");
 var jwtCfg = jwtSection.Get<JwtSettings>()!;
 builder.Services.AddSingleton(jwtCfg);
@@ -76,10 +83,21 @@ builder.Services
 
 builder.Services.AddAuthorization();
 
-// ======= CORS DEV (todo abierto) =======
-const string CorsDev = "cors-dev";
+// =====================
+// CORS (Prod restringido / Dev abierto)
+// =====================
+const string ProdOrigin = "https://uniondeprofesionales.com";
+const string CorsProd = "cors-prod";
+const string CorsDev  = "cors-dev";
+
 builder.Services.AddCors(opt =>
 {
+    opt.AddPolicy(CorsProd, p =>
+        p.WithOrigins(ProdOrigin)
+         .AllowAnyHeader()
+         .AllowAnyMethod()
+         .AllowCredentials());
+
     opt.AddPolicy(CorsDev, p =>
         p.SetIsOriginAllowed(_ => true)
          .AllowAnyHeader()
@@ -87,27 +105,44 @@ builder.Services.AddCors(opt =>
          .AllowCredentials());
 });
 
-// ======= Seeds al arrancar =======
-builder.Services.AddHostedService<RolesBootstrap>();
-builder.Services.AddHostedService<AdminUserBootstrap>();
-
-// ======= Kestrel: escuchar en todas las IPs =======
+// =====================
+// Kestrel: escuchar en todas las IPs
+// =====================
 builder.WebHost.UseKestrel();
 builder.WebHost.ConfigureKestrel(o => { o.ListenAnyIP(5080); });
 
 var app = builder.Build();
 
-// ======= Swagger =======
+// =====================
+// Swagger
+// (Nginx lo expondrá como /api/swagger/ → /swagger/)
+// =====================
 app.UseSwagger();
 app.UseSwaggerUI();
 
-// ======= Middleware =======
+// =====================
+// Middleware
+// =====================
+
+// MUY IMPORTANTE: primero, para que respete X-Forwarded-* del proxy (Nginx)
+// y así Request.IsHttps sea true y las cookies salgan Secure en prod.
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+});
+
 app.UseRouting();
-app.UseCors(CorsDev);
+
+// Elige política CORS según entorno
+var corsPolicy = app.Environment.IsDevelopment() ? CorsDev : CorsProd;
+app.UseCors(corsPolicy);
+
 app.UseAuthentication();
 app.UseAuthorization();
 
-// ======= Healthcheck =======
+// =====================
+// Healthcheck
+// =====================
 app.MapGet("/healthz", () => Results.Ok(new
 {
     status = "ok",
@@ -115,7 +150,9 @@ app.MapGet("/healthz", () => Results.Ok(new
     timestamp = DateTime.UtcNow
 }));
 
-// ======= Hubs & Controllers =======
+// =====================
+// Hubs & Controllers
+// =====================
 app.MapHub<MarcadorHub>("/hub/marcador");
 app.MapControllers();
 
