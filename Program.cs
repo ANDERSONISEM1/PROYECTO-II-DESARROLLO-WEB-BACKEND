@@ -17,7 +17,7 @@ builder.Services.AddSignalR();
 // Controllers
 builder.Services.AddControllers();
 
-// Repos existentes
+// ======= Repositorios =======
 builder.Services.AddScoped<MarcadorRepo>();
 builder.Services.AddScoped<JugadoresRepo>();
 builder.Services.AddScoped<FaltasRepo>();
@@ -35,7 +35,7 @@ builder.Services.AddScoped<AjustesRepo>();
 // DB wrapper
 builder.Services.AddSingleton<Db>();
 
-// === Auth / JWT ===
+// ======= Auth / JWT =======
 var jwtSection = builder.Configuration.GetSection("Jwt");
 var jwtCfg = jwtSection.Get<JwtSettings>()!;
 builder.Services.AddSingleton(jwtCfg);
@@ -76,7 +76,7 @@ builder.Services
 
 builder.Services.AddAuthorization();
 
-// ===== CORS DEV (abre todo: útil ahora; endurecer en prod) =====
+// ======= CORS DEV (todo abierto) =======
 const string CorsDev = "cors-dev";
 builder.Services.AddCors(opt =>
 {
@@ -87,29 +87,27 @@ builder.Services.AddCors(opt =>
          .AllowCredentials());
 });
 
-// Seeds al arrancar
+// ======= Seeds al arrancar =======
 builder.Services.AddHostedService<RolesBootstrap>();
 builder.Services.AddHostedService<AdminUserBootstrap>();
 
-// Kestrel: escuchar en todas las IPs (no localhost)
+// ======= Kestrel: escuchar en todas las IPs =======
 builder.WebHost.UseKestrel();
 builder.WebHost.ConfigureKestrel(o => { o.ListenAnyIP(5080); });
 
 var app = builder.Build();
 
-// Swagger (ok en prod para ti ahora)
+// ======= Swagger =======
 app.UseSwagger();
 app.UseSwaggerUI();
 
+// ======= Middleware =======
 app.UseRouting();
-
-// CORS ANTES de Auth
 app.UseCors(CorsDev);
-
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Healthcheck público
+// ======= Healthcheck =======
 app.MapGet("/healthz", () => Results.Ok(new
 {
     status = "ok",
@@ -117,11 +115,11 @@ app.MapGet("/healthz", () => Results.Ok(new
     timestamp = DateTime.UtcNow
 }));
 
+// ======= Hubs & Controllers =======
 app.MapHub<MarcadorHub>("/hub/marcador");
-
 app.MapControllers();
 
-// No fuerces localhost aquí (rompe en contenedor):
+// ⚠️ No fuerces localhost aquí (rompe en contenedor):
 // app.Urls.Add("http://localhost:5080");
 
 app.Run();
